@@ -1,0 +1,1163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rhysil Forensics — Truth Exists in Data</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Rajdhani:wght@300;400;500;600;700&family=Source+Code+Pro:wght@300;400&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════
+   VARIABLES & RESET
+═══════════════════════════════════════ */
+:root {
+  --ink:       #07090d;
+  --ink2:      #0d1117;
+  --gold:      #c9960c;
+  --goldL:     #e8b840;
+  --goldF:     rgba(201,150,12,0.08);
+  --goldD:     rgba(201,150,12,0.18);
+  --mist:      #8899aa;
+  --steel:     #c0ccd8;
+  --white:     #ffffff;
+  --paper:     #f5f0e8;
+  --danger:    #c0392b;
+  --nav-h:     68px;
+}
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body {
+  background: var(--ink);
+  color: var(--steel);
+  font-family: 'Rajdhani', sans-serif;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+/* ═══════════════════════════════════════
+   GRID TEXTURE
+═══════════════════════════════════════ */
+body::after {
+  content:''; position:fixed; inset:0; z-index:0; pointer-events:none;
+  background-image:
+    linear-gradient(rgba(201,150,12,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(201,150,12,0.04) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+/* ═══════════════════════════════════════
+   LOGIN SCREEN
+═══════════════════════════════════════ */
+#loginScreen {
+  position:fixed; inset:0; z-index:1000;
+  background: var(--ink);
+  display:flex; align-items:center; justify-content:center;
+  flex-direction:column;
+  animation: fadeIn 0.6s ease;
+}
+#loginScreen::after {
+  content:''; position:absolute; inset:0; pointer-events:none;
+  background-image:
+    linear-gradient(rgba(201,150,12,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(201,150,12,0.04) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+.login-box {
+  position:relative; z-index:1;
+  width:100%; max-width:420px;
+  padding: 0 24px;
+  display:flex; flex-direction:column; align-items:center; gap:0;
+}
+.login-fp {
+  width:90px; margin-bottom:24px;
+  animation: glowPulse 3s ease-in-out infinite;
+}
+@keyframes glowPulse {
+  0%,100%{ filter:drop-shadow(0 0 12px rgba(201,150,12,0.25)); }
+  50%    { filter:drop-shadow(0 0 28px rgba(201,150,12,0.55)); }
+}
+.login-brand {
+  font-family:'Cormorant Garamond',serif;
+  font-size:36px; font-weight:300;
+  color:var(--white); text-align:center;
+  letter-spacing:1px; margin-bottom:4px;
+}
+.login-brand span { color:var(--gold); }
+.login-sub {
+  font-family:'Source Code Pro',monospace;
+  font-size:8px; letter-spacing:4px;
+  color:var(--mist); text-transform:uppercase;
+  text-align:center; margin-bottom:32px;
+}
+.login-tagline {
+  font-family:'Cormorant Garamond',serif;
+  font-style:italic; font-size:14px;
+  color:rgba(201,150,12,0.6);
+  text-align:center; margin-bottom:40px;
+}
+.login-label {
+  font-family:'Source Code Pro',monospace;
+  font-size:8px; letter-spacing:3px;
+  color:var(--mist); text-transform:uppercase;
+  align-self:flex-start; margin-bottom:8px;
+}
+.login-input {
+  width:100%; padding:14px 18px;
+  background:rgba(255,255,255,0.04);
+  border:1px solid var(--goldD);
+  color:var(--white);
+  font-family:'Rajdhani',sans-serif; font-size:16px;
+  outline:none; margin-bottom:16px;
+  transition:border-color 0.3s;
+}
+.login-input:focus { border-color:var(--gold); }
+.login-btn {
+  width:100%; padding:15px;
+  background:var(--gold);
+  border:none; cursor:pointer;
+  font-family:'Rajdhani',sans-serif;
+  font-size:14px; font-weight:700;
+  letter-spacing:3px; text-transform:uppercase;
+  color:var(--ink);
+  transition:background 0.3s, transform 0.1s;
+  margin-top:4px;
+}
+.login-btn:hover { background:var(--goldL); }
+.login-btn:active { transform:scale(0.98); }
+.login-error {
+  font-family:'Source Code Pro',monospace;
+  font-size:9px; letter-spacing:2px;
+  color:var(--danger); text-align:center;
+  margin-top:12px; min-height:16px;
+}
+.login-hint {
+  font-family:'Source Code Pro',monospace;
+  font-size:8px; letter-spacing:1px;
+  color:rgba(255,255,255,0.12); text-align:center;
+  margin-top:32px;
+}
+
+/* ═══════════════════════════════════════
+   NAV
+═══════════════════════════════════════ */
+nav {
+  position:fixed; top:0; left:0; right:0;
+  height:var(--nav-h); z-index:100;
+  background:rgba(7,9,13,0.92);
+  backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--goldD);
+  display:flex; align-items:center;
+  padding:0 40px;
+  gap:0;
+}
+.nav-brand {
+  font-family:'Cormorant Garamond',serif;
+  font-size:22px; font-weight:300;
+  color:var(--white); letter-spacing:1px;
+  cursor:pointer; margin-right:auto;
+  flex-shrink:0;
+}
+.nav-brand span { color:var(--gold); }
+.nav-links {
+  display:flex; align-items:center; gap:2px;
+  list-style:none;
+}
+.nav-links li a {
+  font-family:'Source Code Pro',monospace;
+  font-size:9px; letter-spacing:2px;
+  color:var(--mist); text-transform:uppercase;
+  text-decoration:none; padding:8px 14px;
+  border:1px solid transparent;
+  transition:color 0.2s, border-color 0.2s;
+  cursor:pointer; display:block;
+}
+.nav-links li a:hover,
+.nav-links li a.active {
+  color:var(--gold);
+  border-color:var(--goldD);
+}
+.nav-logout {
+  font-family:'Source Code Pro',monospace;
+  font-size:9px; letter-spacing:2px;
+  color:rgba(192,57,43,0.6); text-transform:uppercase;
+  background:none; border:1px solid rgba(192,57,43,0.25);
+  padding:7px 14px; cursor:pointer;
+  margin-left:16px;
+  transition:color 0.2s, border-color 0.2s;
+}
+.nav-logout:hover { color:var(--danger); border-color:var(--danger); }
+
+/* Hamburger for mobile */
+.nav-toggle {
+  display:none; flex-direction:column; gap:5px;
+  background:none; border:none; cursor:pointer; padding:4px;
+}
+.nav-toggle span {
+  display:block; width:22px; height:1.5px;
+  background:var(--gold); transition:all 0.3s;
+}
+
+/* ═══════════════════════════════════════
+   MAIN / PAGES
+═══════════════════════════════════════ */
+main {
+  padding-top:var(--nav-h);
+  position:relative; z-index:1;
+}
+.page-section {
+  display:none; min-height:calc(100vh - var(--nav-h));
+  animation: fadeUp 0.7s ease both;
+}
+.page-section.active { display:block; }
+
+@keyframes fadeIn  { from{opacity:0;}       to{opacity:1;} }
+@keyframes fadeUp  { from{opacity:0;transform:translateY(20px);} to{opacity:1;transform:translateY(0);} }
+@keyframes fadeDown{ from{opacity:0;transform:translateY(-20px);}to{opacity:1;transform:translateY(0);} }
+
+/* ═══════════════════════════════════════
+   HERO — HOME
+═══════════════════════════════════════ */
+.hero {
+  min-height:calc(100vh - var(--nav-h));
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  text-align:center; padding:60px 24px;
+  position:relative; overflow:hidden;
+}
+.hero-fp-bg {
+  position:absolute; inset:0;
+  display:flex; align-items:center; justify-content:center;
+  opacity:0.04; pointer-events:none;
+}
+.hero-fp-bg svg { width:min(700px,90vw); }
+
+.hero-eyebrow {
+  font-family:'Source Code Pro',monospace;
+  font-size:9px; letter-spacing:5px;
+  color:rgba(201,150,12,0.55); text-transform:uppercase;
+  margin-bottom:20px;
+  animation: fadeDown 1s 0.2s ease both;
+}
+.hero-title {
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(52px,10vw,110px);
+  font-weight:300; color:var(--white);
+  line-height:0.92; letter-spacing:-1px;
+  margin-bottom:16px;
+  animation: fadeDown 1s 0.35s ease both;
+}
+.hero-title em { color:var(--gold); font-style:normal; display:block; }
+.hero-rule {
+  width:80px; height:1px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);
+  margin:0 auto 20px;
+  animation: fadeIn 1s 0.5s ease both;
+}
+.hero-tagline {
+  font-family:'Cormorant Garamond',serif;
+  font-style:italic; font-size:clamp(18px,3vw,26px);
+  color:var(--gold); margin-bottom:48px;
+  animation: fadeUp 1s 0.55s ease both;
+}
+.hero-cta-row {
+  display:flex; gap:12px; flex-wrap:wrap; justify-content:center;
+  animation: fadeUp 1s 0.7s ease both;
+}
+.btn-gold {
+  padding:14px 36px;
+  background:var(--gold); border:none; cursor:pointer;
+  font-family:'Rajdhani',sans-serif;
+  font-size:13px; font-weight:700; letter-spacing:3px;
+  text-transform:uppercase; color:var(--ink);
+  transition:background 0.3s;
+}
+.btn-gold:hover { background:var(--goldL); }
+.btn-outline {
+  padding:13px 36px;
+  background:none; border:1px solid var(--goldD); cursor:pointer;
+  font-family:'Rajdhani',sans-serif;
+  font-size:13px; font-weight:600; letter-spacing:3px;
+  text-transform:uppercase; color:var(--gold);
+  transition:background 0.3s, border-color 0.3s;
+}
+.btn-outline:hover { background:var(--goldF); border-color:var(--gold); }
+
+.hero-stats {
+  display:flex; gap:48px; margin-top:72px; flex-wrap:wrap; justify-content:center;
+  animation: fadeUp 1s 0.85s ease both;
+}
+.stat-item { text-align:center; }
+.stat-num {
+  font-family:'Cormorant Garamond',serif;
+  font-size:40px; font-weight:300; color:var(--gold);
+  line-height:1; display:block;
+}
+.stat-label {
+  font-family:'Source Code Pro',monospace;
+  font-size:8px; letter-spacing:3px;
+  color:var(--mist); text-transform:uppercase; margin-top:4px;
+}
+
+/* ═══════════════════════════════════════
+   SECTION SHARED STYLES
+═══════════════════════════════════════ */
+.inner { max-width:960px; margin:0 auto; padding:80px 40px; }
+.inner-wide { max-width:1100px; margin:0 auto; padding:80px 40px; }
+
+.sec-label {
+  font-family:'Source Code Pro',monospace;
+  font-size:9px; letter-spacing:5px;
+  color:var(--gold); text-transform:uppercase;
+  margin-bottom:16px;
+  display:flex; align-items:center; gap:12px;
+}
+.sec-label::after {
+  content:''; flex:1; height:1px;
+  background:linear-gradient(90deg,var(--goldD),transparent);
+}
+.sec-title {
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(28px,4.5vw,46px);
+  font-weight:300; color:var(--white);
+  line-height:1.15; margin-bottom:20px;
+}
+.sec-body {
+  font-size:16px; font-weight:300;
+  color:var(--steel); line-height:1.85;
+  max-width:720px;
+}
+
+/* ═══════════════════════════════════════
+   ABOUT PAGE
+═══════════════════════════════════════ */
+.about-grid {
+  display:grid; grid-template-columns:1fr 1fr;
+  gap:48px; margin-top:48px; align-items:start;
+}
+.about-vision {
+  border-left:3px solid var(--gold);
+  padding:28px 32px;
+  background:var(--goldF);
+}
+.about-vision p {
+  font-family:'Cormorant Garamond',serif;
+  font-style:italic; font-size:clamp(17px,2.5vw,22px);
+  font-weight:300; color:var(--paper); line-height:1.65;
+}
+.about-right { display:flex; flex-direction:column; gap:24px; }
+.about-block {}
+.about-block h4 {
+  font-family:'Rajdhani',sans-serif;
+  font-size:13px; font-weight:700;
+  letter-spacing:3px; color:var(--gold);
+  text-transform:uppercase; margin-bottom:8px;
+}
+.about-block p {
+  font-size:15px; font-weight:300;
+  color:var(--steel); line-height:1.75;
+}
+
+/* Founder card */
+.founder-wrap {
+  margin-top:64px;
+  padding:40px;
+  border:1px solid var(--goldD);
+  background:rgba(255,255,255,0.02);
+  display:grid; grid-template-columns:auto 1fr;
+  gap:36px; align-items:start;
+}
+.f-avatar {
+  width:100px; height:100px;
+  border:2px solid var(--gold);
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Cormorant Garamond',serif;
+  font-size:42px; color:var(--gold);
+  flex-shrink:0; position:relative;
+  filter:drop-shadow(0 0 16px rgba(201,150,12,0.3));
+}
+.f-avatar::after {
+  content:''; position:absolute; inset:6px;
+  border:1px solid rgba(201,150,12,0.25);
+}
+.f-name {
+  font-family:'Cormorant Garamond',serif;
+  font-size:32px; font-weight:300; color:var(--white); margin-bottom:4px;
+}
+.f-role {
+  font-family:'Source Code Pro',monospace;
+  font-size:9px; letter-spacing:3px;
+  color:var(--gold); text-transform:uppercase; margin-bottom:16px;
+}
+.f-bio { font-size:15px; color:#8899aa; line-height:1.75; }
+.f-tag {
+  display:inline-block; margin-top:14px;
+  padding:5px 14px;
+  border:1px solid var(--goldD);
+  font-family:'Source Code Pro',monospace;
+  font-size:9px; letter-spacing:2px;
+  color:var(--gold); text-transform:uppercase;
+}
+
+/* Values */
+.values-row {
+  display:flex; gap:2px; flex-wrap:wrap; margin-top:48px;
+}
+.val-chip {
+  flex:1; min-width:120px; padding:20px 16px;
+  background:rgba(255,255,255,0.025);
+  border:1px solid var(--goldD); text-align:center;
+  transition:background 0.3s, border-color 0.3s;
+}
+.val-chip:hover { background:var(--goldF); border-color:rgba(201,150,12,0.5); }
+.val-word {
+  font-family:'Rajdhani',sans-serif;
+  font-size:14px; font-weight:700;
+  letter-spacing:2px; color:var(--white);
+  text-transform:uppercase; display:block; margin-bottom:5px;
+}
+.val-sub {
+  font-family:'Source Code Pro',monospace;
+  font-size:8px; color:var(--mist); letter-spacing:1px;
+}
+
+/* ═══════════════════════════════════════
+   SERVICES PAGE
+═══════════════════════════════════════ */
+.services-grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:2px; margin-top:40px;
+}
+.srv-card {
+  padding:28px 26px;
+  background:rgba(255,255,255,0.025);
+  border:1px solid var(--goldD);
+  position:relative; overflow:hidden;
+  transition:background 0.3s, border-color 0.3s, transform 0.2s;
+  cursor:default;
+}
+.srv-card:hover {
+  background:var(--goldF);
+  border-color:rgba(201,150,12,0.5);
+  transform:translateY(-2px);
+}
+.srv-card::before {
+  content:attr(data-icon);
+  position:absolute; right:16px; top:12px;
+  font-size:40px; opacity:0.12; pointer-events:none;
+}
+.srv-flag {
+  font-family:'Source Code Pro',monospace;
+  font-size:8px; letter-spacing:3px;
+  color:var(--gold); text-transform:uppercase; margin-bottom:10px;
+}
+.srv-name {
+  font-family:'Rajdhani',sans-serif;
+  font-size:18px; font-weight:700;
+  color:var(--white); margin-bottom:8px; line-height:1.2;
+}
+.srv-desc {
+  font-size:13px; color:#6a7888; line-height:1.6;
+}
+.srv-flagship {
+  position:absolute; top:0; right:0;
+  background:var(--gold); color:var(--ink);
+  font-family:'Source Code Pro',monospace;
+  font-size:7px; letter-spacing:2px;
+  padding:3px 8px; text-transform:uppercase;
+}
+
+/* ═══════════════════════════════════════
+   LAW POSITION PAGE
+═══════════════════════════════════════ */
+.law-hero {
+  text-align:center; padding:80px 40px 60px;
+  border-bottom:1px solid var(--goldD);
+}
+.law-hero .sec-title { font-size:clamp(34px,6vw,64px); }
+
+.law-axioms {
+  max-width:800px; margin:0 auto;
+  padding:60px 40px; display:flex; flex-direction:column; gap:32px;
+}
+.axiom {
+  display:flex; align-items:flex-start; gap:24px;
+  padding:28px 32px;
+  border:1px solid rgba(192,57,43,0.2);
+  background:linear-gradient(135deg,rgba(192,57,43,0.04),rgba(201,150,12,0.03));
+  transition:border-color 0.3s;
+}
+.axiom:hover { border-color:rgba(192,57,43,0.45); }
+.axiom-num {
+  font-family:'Cormorant Garamond',serif;
+  font-size:48px; font-weight:300;
+  color:rgba(192,57,43,0.35); line-height:1;
+  flex-shrink:0; min-width:52px;
+}
+.axiom-text {
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(20px,3vw,28px);
+  font-weight:400; color:var(--white); line-height:1.35;
+}
+.axiom-text strong { color:var(--gold); font-weight:600; }
+
+.law-conclusion {
+  max-width:800px; margin:0 auto;
+  padding:0 40px 80px;
+}
+.law-conclusion-box {
+  border-left:4px solid var(--gold);
+  padding:32px 36px;
+  background:var(--goldF);
+}
+.law-conclusion-box p {
+  font-size:16px; font-weight:300;
+  color:var(--steel); line-height:1.85;
+}
+.law-conclusion-box p strong { color:var(--white); font-weight:600; }
+
+/* ═══════════════════════════════════════
+   BEYOND LIMITS ENTERPRISE
+═══════════════════════════════════════ */
+.enterprise-hero {
+  text-align:center; padding:80px 40px 0;
+}
+.enterprise-tree {
+  max-width:700px; margin:60px auto 0;
+  text-align:center; padding:0 40px;
+}
+.ent-parent-label {
+  font-family:'Source Code Pro',monospace;
+  font-size:9px; letter-spacing:4px;
+  color:var(--mist); text-transform:uppercase; margin-bottom:8px;
+}
+.ent-parent-name {
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(26px,4vw,40px); font-weight:300;
+  color:var(--white); margin-bottom:32px;
+}
+.ent-line {
+  width:1px; height:52px;
+  background:linear-gradient(var(--gold),transparent);
+  margin:0 auto 32px;
+}
+.ent-child {
+  display:inline-block;
+  border:2px solid var(--gold);
+  padding:16px 48px;
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(22px,3.5vw,32px); font-weight:300;
+  color:var(--gold); letter-spacing:1px;
+  filter:drop-shadow(0 0 16px rgba(201,150,12,0.3));
+}
+.ent-child-sub {
+  font-family:'Source Code Pro',monospace;
+  font-size:9px; letter-spacing:3px;
+  color:var(--mist); margin-top:12px;
+  text-transform:uppercase;
+}
+
+.enterprise-bio {
+  max-width:860px; margin:64px auto 0; padding:0 40px 80px;
+  display:grid; grid-template-columns:1fr 1fr; gap:40px;
+}
+.ent-bio-block {
+  padding:28px;
+  border:1px solid var(--goldD);
+  background:rgba(255,255,255,0.02);
+}
+.ent-bio-block h4 {
+  font-family:'Rajdhani',sans-serif;
+  font-size:12px; font-weight:700;
+  letter-spacing:3px; color:var(--gold);
+  text-transform:uppercase; margin-bottom:14px;
+  padding-bottom:10px;
+  border-bottom:1px solid var(--goldD);
+}
+.ent-bio-block p {
+  font-size:14px; font-weight:300;
+  color:var(--steel); line-height:1.8;
+}
+
+/* ═══════════════════════════════════════
+   PORTFOLIO PAGE
+═══════════════════════════════════════ */
+.portfolio-coming {
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  min-height:60vh; text-align:center; padding:60px 40px;
+}
+.coming-icon {
+  font-size:64px; margin-bottom:28px; opacity:0.3;
+  animation:glowPulse 3s ease-in-out infinite;
+}
+.coming-title {
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(28px,5vw,52px); font-weight:300;
+  color:var(--white); margin-bottom:16px;
+}
+.coming-sub {
+  font-family:'Source Code Pro',monospace;
+  font-size:10px; letter-spacing:4px;
+  color:var(--mist); text-transform:uppercase;
+  margin-bottom:24px;
+}
+.coming-body {
+  font-size:16px; font-weight:300;
+  color:var(--steel); line-height:1.8;
+  max-width:520px;
+}
+
+/* ═══════════════════════════════════════
+   CONTACT PAGE
+═══════════════════════════════════════ */
+.contact-grid {
+  display:grid; grid-template-columns:1fr 1fr;
+  gap:48px; margin-top:48px;
+}
+.contact-card {
+  padding:36px;
+  border:1px solid var(--goldD);
+  background:rgba(255,255,255,0.02);
+  display:flex; flex-direction:column; gap:28px;
+}
+.c-item { display:flex; align-items:flex-start; gap:18px; }
+.c-icon {
+  width:44px; height:44px; flex-shrink:0;
+  border:1px solid var(--goldD);
+  display:flex; align-items:center; justify-content:center;
+  font-size:18px;
+}
+.c-label {
+  font-family:'Source Code Pro',monospace;
+  font-size:8px; letter-spacing:3px;
+  color:var(--mist); text-transform:uppercase;
+  display:block; margin-bottom:4px;
+}
+.c-value {
+  font-family:'Rajdhani',sans-serif;
+  font-size:17px; font-weight:500;
+  color:var(--white); letter-spacing:0.3px;
+}
+
+.contact-message {
+  padding:36px;
+  border:1px solid var(--goldD);
+  background:rgba(255,255,255,0.02);
+  display:flex; flex-direction:column; gap:16px;
+}
+.contact-message h3 {
+  font-family:'Cormorant Garamond',serif;
+  font-size:26px; font-weight:300; color:var(--white);
+  margin-bottom:4px;
+}
+.c-input, .c-textarea {
+  width:100%; padding:13px 16px;
+  background:rgba(255,255,255,0.04);
+  border:1px solid var(--goldD);
+  color:var(--white);
+  font-family:'Rajdhani',sans-serif; font-size:15px;
+  outline:none; resize:none;
+  transition:border-color 0.3s;
+}
+.c-input:focus, .c-textarea:focus { border-color:var(--gold); }
+.c-textarea { min-height:120px; }
+.c-send {
+  padding:14px 32px; align-self:flex-start;
+  background:var(--gold); border:none; cursor:pointer;
+  font-family:'Rajdhani',sans-serif;
+  font-size:13px; font-weight:700;
+  letter-spacing:3px; text-transform:uppercase; color:var(--ink);
+  transition:background 0.3s;
+}
+.c-send:hover { background:var(--goldL); }
+
+/* ═══════════════════════════════════════
+   FOOTER
+═══════════════════════════════════════ */
+footer {
+  border-top:1px solid var(--goldD);
+  padding:32px 40px;
+  display:flex; justify-content:space-between;
+  align-items:center; flex-wrap:wrap; gap:16px;
+  position:relative; z-index:1;
+  background:rgba(7,9,13,0.8);
+}
+.footer-brand {
+  font-family:'Cormorant Garamond',serif;
+  font-size:20px; color:var(--white); letter-spacing:1px;
+}
+.footer-brand span { color:var(--gold); }
+.footer-meta {
+  font-family:'Source Code Pro',monospace;
+  font-size:8px; letter-spacing:2px;
+  color:var(--mist); text-align:right; line-height:2;
+}
+
+/* ═══════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════ */
+@media(max-width:768px){
+  nav { padding:0 20px; }
+  .nav-links { display:none; flex-direction:column; position:fixed; top:var(--nav-h); left:0; right:0; background:rgba(7,9,13,0.98); padding:20px; border-bottom:1px solid var(--goldD); }
+  .nav-links.open { display:flex; }
+  .nav-links li a { padding:12px 16px; border-bottom:1px solid rgba(201,150,12,0.08); }
+  .nav-logout { display:none; }
+  .nav-toggle { display:flex; margin-left:16px; }
+  .about-grid, .contact-grid, .enterprise-bio { grid-template-columns:1fr; }
+  .founder-wrap { grid-template-columns:1fr; }
+  .inner, .inner-wide { padding:56px 20px; }
+  .law-axioms, .law-conclusion { padding-left:20px; padding-right:20px; }
+  footer { padding:24px 20px; }
+  .hero-stats { gap:28px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════
+     LOGIN SCREEN
+═══════════════════════════════════════ -->
+<div id="loginScreen">
+  <div class="login-box">
+
+    <!-- Fingerprint SVG -->
+    <svg class="login-fp" viewBox="0 0 90 90" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="lg" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#e8b840"/>
+          <stop offset="100%" stop-color="#c9960c"/>
+        </linearGradient>
+      </defs>
+      <g transform="translate(45,45)">
+        <ellipse cx="0" cy="0" rx="4"  ry="3.5" fill="none" stroke="url(#lg)" stroke-width="2"/>
+        <ellipse cx="0" cy="0" rx="10" ry="8.5" fill="none" stroke="url(#lg)" stroke-width="1.7"/>
+        <ellipse cx="0" cy="0" rx="17" ry="14"  fill="none" stroke="url(#lg)" stroke-width="1.4"/>
+        <ellipse cx="0" cy="0" rx="25" ry="20"  fill="none" stroke="url(#lg)" stroke-width="1.2"/>
+        <ellipse cx="0" cy="0" rx="33" ry="27"  fill="none" stroke="url(#lg)" stroke-width="1"/>
+        <ellipse cx="0" cy="0" rx="41" ry="34"  fill="none" stroke="url(#lg)" stroke-width="0.8"/>
+        <ellipse cx="0" cy="0" rx="17" ry="14"  fill="none" stroke="#07090d" stroke-width="3" stroke-dasharray="5,28" stroke-dashoffset="7"/>
+        <ellipse cx="0" cy="0" rx="25" ry="20"  fill="none" stroke="#07090d" stroke-width="2.5" stroke-dasharray="4,42" stroke-dashoffset="16"/>
+        <circle cx="0" cy="0" r="2.2" fill="url(#lg)"/>
+      </g>
+    </svg>
+
+    <div class="login-brand"><span>R</span>hysil Forensics</div>
+    <div class="login-sub">Secure Access Portal</div>
+    <div class="login-tagline">"Truth Exists in Data."</div>
+
+    <div class="login-label">Access Password</div>
+    <input class="login-input" type="password" id="pwInput" placeholder="Enter password" onkeydown="if(event.key==='Enter')doLogin()"/>
+    <button class="login-btn" onclick="doLogin()">Authenticate →</button>
+    <div class="login-error" id="loginError"></div>
+    <div class="login-hint">Rhysil Forensics · Beyond Limits Enterprise · Nairobi KE</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     NAV
+═══════════════════════════════════════ -->
+<nav id="mainNav" style="display:none;">
+  <div class="nav-brand" onclick="showPage('home')"><span>R</span>hysil Forensics</div>
+  <ul class="nav-links" id="navLinks">
+    <li><a onclick="showPage('home')"       class="active" id="nav-home">Home</a></li>
+    <li><a onclick="showPage('about')"      id="nav-about">About</a></li>
+    <li><a onclick="showPage('services')"   id="nav-services">Services</a></li>
+    <li><a onclick="showPage('law')"        id="nav-law">The Law</a></li>
+    <li><a onclick="showPage('enterprise')" id="nav-enterprise">Enterprise</a></li>
+    <li><a onclick="showPage('portfolio')"  id="nav-portfolio">Portfolio</a></li>
+    <li><a onclick="showPage('contact')"    id="nav-contact">Contact</a></li>
+  </ul>
+  <button class="nav-logout" onclick="doLogout()">Sign Out</button>
+  <button class="nav-toggle" id="navToggle" onclick="toggleNav()">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- ═══════════════════════════════════════
+     MAIN CONTENT
+═══════════════════════════════════════ -->
+<main id="mainContent" style="display:none;">
+
+  <!-- ── HOME ── -->
+  <div class="page-section active" id="page-home">
+    <div class="hero">
+      <!-- Big fingerprint background -->
+      <div class="hero-fp-bg">
+        <svg viewBox="0 0 600 600" xmlns="http://www.w3.org/2000/svg">
+          <g transform="translate(300,300)">
+            <ellipse cx="0" cy="0" rx="10"  ry="8"   fill="none" stroke="white" stroke-width="4"/>
+            <ellipse cx="0" cy="0" rx="24"  ry="20"  fill="none" stroke="white" stroke-width="3.5"/>
+            <ellipse cx="0" cy="0" rx="42"  ry="34"  fill="none" stroke="white" stroke-width="3"/>
+            <ellipse cx="0" cy="0" rx="63"  ry="51"  fill="none" stroke="white" stroke-width="2.5"/>
+            <ellipse cx="0" cy="0" rx="86"  ry="70"  fill="none" stroke="white" stroke-width="2"/>
+            <ellipse cx="0" cy="0" rx="112" ry="91"  fill="none" stroke="white" stroke-width="1.8"/>
+            <ellipse cx="0" cy="0" rx="140" ry="114" fill="none" stroke="white" stroke-width="1.5"/>
+            <ellipse cx="0" cy="0" rx="171" ry="139" fill="none" stroke="white" stroke-width="1.2"/>
+            <ellipse cx="0" cy="0" rx="204" ry="166" fill="none" stroke="white" stroke-width="1"/>
+            <ellipse cx="0" cy="0" rx="240" ry="195" fill="none" stroke="white" stroke-width="0.8"/>
+            <ellipse cx="0" cy="0" rx="278" ry="226" fill="none" stroke="white" stroke-width="0.6"/>
+            <!-- Breaks -->
+            <ellipse cx="0" cy="0" rx="63"  ry="51"  fill="none" stroke="#07090d" stroke-width="5" stroke-dasharray="12,100" stroke-dashoffset="20"/>
+            <ellipse cx="0" cy="0" rx="112" ry="91"  fill="none" stroke="#07090d" stroke-width="4" stroke-dasharray="10,178" stroke-dashoffset="50"/>
+            <ellipse cx="0" cy="0" rx="171" ry="139" fill="none" stroke="#07090d" stroke-width="3" stroke-dasharray="14,270" stroke-dashoffset="80"/>
+          </g>
+        </svg>
+      </div>
+
+      <div class="hero-eyebrow">// Beyond Limits Rhysil Enterprise Co. · Nairobi, Kenya</div>
+      <div class="hero-title">
+        Rhysil
+        <em>Forensics</em>
+      </div>
+      <div class="hero-rule"></div>
+      <div class="hero-tagline">"Truth Exists in Data."</div>
+      <div class="hero-cta-row">
+        <button class="btn-gold" onclick="showPage('services')">Our Services</button>
+        <button class="btn-outline" onclick="showPage('about')">About Us</button>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-item">
+          <span class="stat-num">9+</span>
+          <span class="stat-label">Forensic Disciplines</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-num">1</span>
+          <span class="stat-label">Unwavering Standard</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-num">0</span>
+          <span class="stat-label">Compromises</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── ABOUT ── -->
+  <div class="page-section" id="page-about">
+    <div class="inner">
+      <div class="sec-label">01 · About Rhysil Forensics</div>
+      <div class="sec-title">Where Science<br>Becomes the Witness</div>
+      <div class="sec-body">
+        Rhysil Forensics is a forensic criminal investigations firm under Beyond Limits Rhysil Enterprise Company, headquartered in Nairobi, Kenya. We exist to bridge the gap between what the eye claims to see and what science confirms.
+      </div>
+
+      <div class="about-grid">
+        <div class="about-vision">
+          <p>"To bring scientific transformation to criminal investigations — moving beyond perception and assumption, into the undeniable language of forensic evidence. We give science a voice so that justice may be served."</p>
+        </div>
+        <div class="about-right">
+          <div class="about-block">
+            <h4>Our Purpose</h4>
+            <p>Every crime scene holds a truth. Every piece of evidence carries a story. Rhysil Forensics exists to read those stories with scientific precision and deliver them, unaltered and undeniable, to those who serve justice.</p>
+          </div>
+          <div class="about-block">
+            <h4>Who We Serve</h4>
+            <p>We serve Kenya's law enforcement agencies, courts, legal professionals, and government bodies — any institution committed to truth and accountability in criminal justice.</p>
+          </div>
+          <div class="about-block">
+            <h4>Our Commitment</h4>
+            <p>Reliability and trustworthiness are not marketing words at Rhysil — they are operational requirements. Every case we handle is treated with the same standard: the full weight of scientific truth.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Founder -->
+      <div class="founder-wrap">
+        <div class="f-avatar">R</div>
+        <div>
+          <div class="f-name">Founder — Rhysil Forensics</div>
+          <div class="f-role">Chief Forensic Officer · Dactyloscopist · Criminal Investigations Student</div>
+          <div class="f-bio">
+            A passionate forensic criminal investigations student and practicing Dactyloscopist, the founder built Rhysil Forensics on the belief that truth is always present at a scene — it simply requires the right scientific lens to uncover it. Specializing in fingerprint evidence, the founder understands that identity hides in the ridges of a print, and that every loop, whorl, and arch tells a story that cannot lie.
+            <br><br>
+            Rhysil Forensics is not just a company — it is a commitment to Kenya's justice system, to the victims who deserve answers, and to the science that makes those answers possible. Because the law does not compromise, and neither do we.
+          </div>
+          <div class="f-tag">Specialist · Dactyloscopy & Latent Print Analysis</div>
+        </div>
+      </div>
+
+      <!-- Values -->
+      <div class="values-row">
+        <div class="val-chip"><span class="val-word">Truth</span><span class="val-sub">Evidence over opinion</span></div>
+        <div class="val-chip"><span class="val-word">Precision</span><span class="val-sub">Accuracy in every detail</span></div>
+        <div class="val-chip"><span class="val-word">Integrity</span><span class="val-sub">Uncompromised ethics</span></div>
+        <div class="val-chip"><span class="val-word">Reliability</span><span class="val-sub">Trusted every time</span></div>
+        <div class="val-chip"><span class="val-word">Science</span><span class="val-sub">Data leads the way</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SERVICES ── -->
+  <div class="page-section" id="page-services">
+    <div class="inner-wide">
+      <div class="sec-label">02 · Services</div>
+      <div class="sec-title">Full-Spectrum<br>Forensic Services</div>
+      <div class="sec-body">Rhysil Forensics delivers an integrated suite of forensic and criminal investigation services across all major disciplines — from the first fingerprint lifted at a scene to the expert testimony delivered in court.</div>
+
+      <div class="services-grid">
+        <div class="srv-card" data-icon="🔍">
+          <div class="srv-flagship">Flagship</div>
+          <div class="srv-flag">Biometric · Core Specialty</div>
+          <div class="srv-name">Fingerprint Analysis (Dactyloscopy)</div>
+          <div class="srv-desc">Latent, patent & plastic print recovery, AFIS database comparison, minutiae mapping, and ridge detail analysis. The science of identity through touch.</div>
+        </div>
+        <div class="srv-card" data-icon="🧬">
+          <div class="srv-flag">Biological</div>
+          <div class="srv-name">DNA & Serology</div>
+          <div class="srv-desc">Biological evidence collection, DNA profiling and comparison, blood pattern analysis, and species identification from crime scenes.</div>
+        </div>
+        <div class="srv-card" data-icon="💻">
+          <div class="srv-flag">Digital</div>
+          <div class="srv-name">Digital Forensics</div>
+          <div class="srv-desc">Device recovery and imaging, deleted data extraction, metadata analysis, and maintaining cyber-evidence chain of custody.</div>
+        </div>
+        <div class="srv-card" data-icon="🚨">
+          <div class="srv-flag">Scene Investigation</div>
+          <div class="srv-name">Crime Scene Investigation</div>
+          <div class="srv-desc">Full scene documentation, systematic evidence collection, 3D reconstruction, and scene mapping with photographic record.</div>
+        </div>
+        <div class="srv-card" data-icon="🩺">
+          <div class="srv-flag">Medical</div>
+          <div class="srv-name">Forensic Pathology Support</div>
+          <div class="srv-desc">Cause-of-death investigation coordination, autopsy report analysis, wound pattern interpretation, and time-of-death estimation.</div>
+        </div>
+        <div class="srv-card" data-icon="📄">
+          <div class="srv-flag">Document Examination</div>
+          <div class="srv-name">Questioned Documents</div>
+          <div class="srv-desc">Handwriting analysis, forgery and alteration detection, ink and paper examination, and signature verification.</div>
+        </div>
+        <div class="srv-card" data-icon="⚗️">
+          <div class="srv-flag">Toxicology</div>
+          <div class="srv-name">Forensic Toxicology</div>
+          <div class="srv-desc">Substance identification from biological samples, poisoning case analysis, drug and alcohol quantification.</div>
+        </div>
+        <div class="srv-card" data-icon="⚖️">
+          <div class="srv-flag">Legal</div>
+          <div class="srv-name">Expert Witness Testimony</div>
+          <div class="srv-desc">Court-ready forensic reports, professional expert witness services, and evidence presentation for legal proceedings.</div>
+        </div>
+        <div class="srv-card" data-icon="🎯">
+          <div class="srv-flag">Ballistics</div>
+          <div class="srv-name">Firearms & Ballistic Analysis</div>
+          <div class="srv-desc">Tool mark and striation examination, gunshot residue analysis, bullet trajectory mapping, and firearm identification.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── THE LAW ── -->
+  <div class="page-section" id="page-law">
+    <div class="law-hero">
+      <div class="sec-label" style="justify-content:center;">03 · The Rhysil Position on Justice</div>
+      <div class="sec-title">The Law Does Not<br>Compromise.</div>
+    </div>
+
+    <div class="law-axioms">
+      <div class="axiom">
+        <div class="axiom-num">I.</div>
+        <div class="axiom-text">The Law does <strong>not</strong> compromise.</div>
+      </div>
+      <div class="axiom">
+        <div class="axiom-num">II.</div>
+        <div class="axiom-text"><strong>Wrong is wrong</strong> — regardless of who commits it, who defends it, or who profits from its concealment.</div>
+      </div>
+      <div class="axiom">
+        <div class="axiom-num">III.</div>
+        <div class="axiom-text">Evidence does <strong>not</strong> negotiate. Science does <strong>not</strong> take sides.</div>
+      </div>
+      <div class="axiom">
+        <div class="axiom-num">IV.</div>
+        <div class="axiom-text"><strong>Truth exists in data</strong> — and data always tells the story, whether you want it to or not.</div>
+      </div>
+    </div>
+
+    <div class="law-conclusion">
+      <div class="law-conclusion-box">
+        <p>
+          At Rhysil Forensics, we don't interpret evidence to fit a narrative — <strong>we let evidence build the narrative.</strong>
+          Every fingerprint ridge, every digital trace, every biological marker is a word in a sentence that justice must read.
+          We exist to make sure that sentence is never silenced, never twisted, and never ignored.
+          <br><br>
+          A fingerprint doesn't negotiate. Data doesn't have feelings. The evidence will speak the truth regardless of who is in the room, what their title is, or how much power they hold.
+          <br><br>
+          <strong>This is not just our tagline. This is our operating principle. And we mean every word of it.</strong>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── ENTERPRISE ── -->
+  <div class="page-section" id="page-enterprise">
+    <div class="inner">
+      <div class="sec-label">04 · Corporate Structure</div>
+      <div class="sec-title">Beyond Limits<br>Rhysil Enterprise Company</div>
+      <div class="sec-body">
+        Rhysil Forensics operates as the founding and flagship division of Beyond Limits Rhysil Enterprise Company — a Kenyan enterprise built on the conviction that no challenge is too great when science, truth, and determination are your tools.
+      </div>
+
+      <div class="enterprise-tree">
+        <div class="ent-parent-label">Parent Enterprise</div>
+        <div class="ent-parent-name">Beyond Limits Rhysil Enterprise Company</div>
+        <div class="ent-line"></div>
+        <div class="ent-child">Rhysil Forensics</div>
+        <div class="ent-child-sub">Forensic Criminal Investigations Division · Nairobi, Kenya</div>
+      </div>
+    </div>
+
+    <div class="enterprise-bio">
+      <div class="ent-bio-block">
+        <h4>Who We Are</h4>
+        <p>Beyond Limits Rhysil Enterprise Company is a Kenyan enterprise dedicated to pushing past conventional boundaries in forensic science and criminal investigations. We exist where science meets justice — delivering truth in its purest, most provable form.</p>
+      </div>
+      <div class="ent-bio-block">
+        <h4>Our Vision</h4>
+        <p>To become East Africa's most trusted forensic enterprise — a name synonymous with scientific integrity, professional excellence, and an uncompromising commitment to justice.</p>
+      </div>
+      <div class="ent-bio-block">
+        <h4>What Beyond Limits Means</h4>
+        <p>It means we don't stop where others stop. When evidence is difficult to recover, we find it. When a case is complex, we work harder. When the truth is buried, we dig. Beyond limits is not a slogan — it is a daily practice.</p>
+      </div>
+      <div class="ent-bio-block">
+        <h4>Our Foundation</h4>
+        <p>Founded by a specialist Dactyloscopist and criminal investigations student, the enterprise was built from the ground up — with study, passion, and purpose. Every service we offer reflects the seriousness of our founder's commitment to Kenya's justice system.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── PORTFOLIO ── -->
+  <div class="page-section" id="page-portfolio">
+    <div class="inner">
+      <div class="sec-label">05 · Case Portfolio</div>
+      <div class="portfolio-coming">
+        <div class="coming-icon">🗂️</div>
+        <div class="coming-title">Portfolio Coming Soon</div>
+        <div class="coming-sub">// Under Construction</div>
+        <div class="coming-body">
+          As Rhysil Forensics grows, this section will showcase case studies, forensic methodologies, and documented investigative work. All cases will be presented with full confidentiality compliance.
+          <br><br>
+          Check back as the enterprise develops.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── CONTACT ── -->
+  <div class="page-section" id="page-contact">
+    <div class="inner">
+      <div class="sec-label">06 · Contact</div>
+      <div class="sec-title">Get in Touch</div>
+      <div class="sec-body">
+        Whether you are a law enforcement agency, legal professional, or government body — reach out. We respond promptly and treat every enquiry with the same scientific seriousness we apply to every case.
+      </div>
+
+      <div class="contact-grid">
+        <div class="contact-card">
+          <div class="c-item">
+            <div class="c-icon">📱</div>
+            <div>
+              <span class="c-label">WhatsApp</span>
+              <span class="c-value">+254 108 082 847</span>
+            </div>
+          </div>
+          <div class="c-item">
+            <div class="c-icon">✉️</div>
+            <div>
+              <span class="c-label">Email</span>
+              <span class="c-value">Rhysil.sudhaj@gmail.com</span>
+            </div>
+          </div>
+          <div class="c-item">
+            <div class="c-icon">📍</div>
+            <div>
+              <span class="c-label">Location</span>
+              <span class="c-value">Nairobi, Kenya</span>
+            </div>
+          </div>
+          <div class="c-item">
+            <div class="c-icon">🏢</div>
+            <div>
+              <span class="c-label">Enterprise</span>
+              <span class="c-value" style="font-size:14px;">Beyond Limits Rhysil Enterprise Co.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="contact-message">
+          <h3>Send a Message</h3>
+          <input class="c-input" type="text" placeholder="Your Name"/>
+          <input class="c-input" type="text" placeholder="Organisation / Agency"/>
+          <input class="c-input" type="text" placeholder="Subject"/>
+          <textarea class="c-textarea" placeholder="Describe your forensic investigation needs..."></textarea>
+          <button class="c-send">Send Enquiry →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- ═══════════════════════════════════════
+     FOOTER
+═══════════════════════════════════════ -->
+<footer id="mainFooter" style="display:none;">
+  <div class="footer-brand"><span>R</span>hysil Forensics</div>
+  <div class="footer-meta">
+    BEYOND LIMITS RHYSIL ENTERPRISE CO.<br>
+    NAIROBI, KENYA · +254 108 082 847<br>
+    "TRUTH EXISTS IN DATA."
+  </div>
+</footer>
+
+<!-- ═══════════════════════════════════════
+     JAVASCRIPT
+═══════════════════════════════════════ -->
+<script>
+  // ── Password (change this to your preferred password) ──
+  const ACCESS_PASSWORD = "21316massillooryn";
+
+  function doLogin(){
+    const pw = document.getElementById('pwInput').value.trim();
+    if(pw === ACCESS_PASSWORD){
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('mainNav').style.display     = 'flex';
+      document.getElementById('mainContent').style.display = 'block';
+      document.getElementById('mainFooter').style.display  = 'flex';
+    } else {
+      document.getElementById('loginError').textContent = '// Access denied. Incorrect password.';
+      document.getElementById('pwInput').value = '';
+      document.getElementById('pwInput').focus();
+    }
+  }
+
+  function doLogout(){
+    document.getElementById('loginScreen').style.display = 'flex';
+    document.getElementById('mainNav').style.display     = 'none';
+    document.getElementById('mainContent').style.display = 'none';
+    document.getElementById('mainFooter').style.display  = 'none';
+    document.getElementById('pwInput').value = '';
+    document.getElementById('loginError').textContent = '';
+  }
+
+  function showPage(id){
+    // Hide all
+    document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+    // Show target
+    document.getElementById('page-'+id).classList.add('active');
+    document.getElementById('nav-'+id).classList.add('active');
+    // Close mobile menu
+    document.getElementById('navLinks').classList.remove('open');
+    // Scroll to top
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+
+  function toggleNav(){
+    document.getElementById('navLinks').classList.toggle('open');
+  }
+
+  // Focus password field on load
+  window.onload = () => document.getElementById('pwInput').focus();
+</script>
+
+</body>
+</html>
